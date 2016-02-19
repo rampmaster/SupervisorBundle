@@ -3,6 +3,7 @@
 namespace YZ\SupervisorBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -26,14 +27,16 @@ class SupervisorController extends Controller
     /**
      * startStopProcessAction
      *
-     * @param string $start 1 to start, 0 to stop it
-     * @param string $key   The key to retrieve a Supervisor object
-     * @param string $name  The name of a process
-     * @param string $group The group of a process
+     * @param string  $start 1 to start, 0 to stop it
+     * @param string  $key   The key to retrieve a Supervisor object
+     * @param string  $name  The name of a process
+     * @param string  $group The group of a process
+     * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\Response represents an HTTP response.
+     * @throws \Exception
      */
-    public function startStopProcessAction($start, $key, $name, $group)
+    public function startStopProcessAction($start, $key, $name, $group, Request $request)
     {
         $supervisor = $this->get('supervisor.manager')->getSupervisorByKey($key);
         if (!$supervisor) {
@@ -60,7 +63,7 @@ class SupervisorController extends Controller
             $this->get('session')->getFlashBag()->add('error', 'Erreur lors '.($start == "1" ? 'du lancement' : 'de l\'arret').' du processus.');
         }
 
-        if ($this->getRequest()->isXmlHttpRequest()) {
+        if ($request->isXmlHttpRequest()) {
             $processInfo = $process->getProcessInfo();
             $res = json_encode([
                 'success'       => $success,
@@ -222,13 +225,15 @@ class SupervisorController extends Controller
     /**
      * showProcessInfoAction
      *
-     * @param string $key   The key to retrieve a Supervisor object
-     * @param string $name  The name of a process
-     * @param string $group The group of a process
+     * @param string  $key   The key to retrieve a Supervisor object
+     * @param string  $name  The name of a process
+     * @param string  $group The group of a process
+     * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\Response represents an HTTP response.
+     * @throws \Exception
      */
-    public function showProcessInfoAction($key, $name, $group)
+    public function showProcessInfoAction($key, $name, $group, Request $request)
     {
         $supervisorManager = $this->get('supervisor.manager');
         $supervisor = $supervisorManager->getSupervisorByKey($key);
@@ -240,7 +245,7 @@ class SupervisorController extends Controller
 
         $infos = $process->getProcessInfo();
 
-        if ($this->getRequest()->isXmlHttpRequest()) { 
+        if ($request->isXmlHttpRequest()) { 
             $processInfo = [];
             foreach (self::$publicInformations as $public) {
                 $processInfo[$public] = $infos[$public];
@@ -271,13 +276,15 @@ class SupervisorController extends Controller
     /**
      * showProcessAllInfoAction
      *
-     * @param string $key   The key to retrieve a Supervisor object
+     * @param string  $key The key to retrieve a Supervisor object
+     * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\Response represents an HTTP response.
+     * @throws \Exception
      */
-    public function showProcessInfoAllAction($key)
+    public function showProcessInfoAllAction($key, Request $request)
     {
-        if (!$this->getRequest()->isXmlHttpRequest()) { 
+        if (!$request->isXmlHttpRequest()) {
             throw new \Exception('Ajax request expected here');
         }
 
