@@ -16,6 +16,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
+        "zendframework/zendxml": "^1.0",
         "yzalis/supervisor": ">=1.0.0"
     },
     "autoload": {
